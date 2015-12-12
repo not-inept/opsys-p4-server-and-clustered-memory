@@ -3,6 +3,8 @@ from memory import *
 m = Memory()
 print m
 
+
+#Alloc test.
 r = m.alloc("asdasd", 128)
 assert(r == ("A", 128, 1, 1))
 print r
@@ -24,7 +26,9 @@ print r
 print m
 
 
-r = m.delete("B")
+
+#Delete test.
+r = m.deleteFile("adgdsg")
 assert(r == ("B", 1))
 print r
 print m
@@ -34,5 +38,44 @@ assert(r == ("B", 100000, 25, 2))
 print r
 print m
 
+m.alloc("test", 10)
+m.deleteFile("test")
+r = m.alloc("test", 20)
+print r
+print m
+
+
+
+#Read test.
+r = m.read("test", 0, 1)
+print r
+
+
+r = m.alloc("weird", 10000)
+print r
+
+r =  m.read("weird", 4096, 4096)
+assert(r == ("E", 4096, 4096, 1))
+print r
+print m
+
+
+print m.lookupTable
+
+#r = m.read("adgdsg", 4096, 8192)
+r = m.read("afafagagag", 4095, 4097)
+assert(r == ("B", 4095, 4097, 2))
+print r
+print m
+
+r = m.read("afafagagag", 4095, 4098)
+print r
+assert(r == ("B", 4095, 4098, 3))
+print m
+
+r = m.read("afafagagag", 4095, 4097)
+print r
+assert(r == ("B", 4095, 4097, 2))
+print m
 
 print "\n\nTests Passed!"
