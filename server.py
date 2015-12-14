@@ -4,9 +4,12 @@ blocksize = 4096
 
 import threading
 import socket 
+import os
 
 class Server:
   backlog = 5 
+  # this set will serve as a filesystem index
+  files = set()
 
   def __init__(self, port):
     # creates server object
@@ -42,14 +45,41 @@ class Server:
       thread = threading.Thread(target=self.handler, args=(cmd, client))
       thread.start()
 
+  # the following functions implement the server functionality requested
   def store(client, args):
-    print "Not yet implemented."
+    if len(args) != 3:
+      client.send("ERROR: INVALID COMMAND.\n")
+      return
+    if args[1] in files:
+      client.send("ERROR: FILE EXISTS.\n")
+      data = client.recv(args[2]) # can we assume data will be sent regardless of error?
+      return
+    # actually do the storing stuff
+    data = client.recv(args[2]) 
+    f = open(args[1], 'w')
+    f.write(data)
+    files.add(args[1])
+    client.send("ACK\n")
+
   def read(client, args):
     print "Not yet implemented."
+
   def delete(client, args):
-    print "Not yet implemented."
-  def dir(client, args):
-    print "Not yet implemented."
+    if len(args) != 2:
+      client.send("ERROR: INVALID COMMAND.\n")
+      return
+    if args[1] not in files:
+      client.send("ERROR: NO SUCH FILE\n")
+      return
+    os.remove(args[1])
+    files.remove(args[1])
+
+  def dir(client):
+    files_sorted = sorted(lst, key=str.lower)
+    result = str(len(files))+"\n"
+    for f in files_sorted:
+      result += f + "\n"
+    client.send(result)
 
   def handler(self, cmd, client):
     # Handles specific client connections until they close
@@ -64,9 +94,9 @@ class Server:
       elif args[0] == "DELETE":
         self.delete(client, args)
       elif args[0] == "DIR":
-        self.dir(client, args)
+        self.dir(client)
       else:
-        print "[thread",thread+"] Error: Invalid command."
+        client.send("ERROR: INVALID COMMAND.\n")
       cmd = self.process_line(client).strip()
 
     print "[thread",thread+"] Client closed its socket....terminating"
