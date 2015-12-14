@@ -1,4 +1,5 @@
 #!/usr/bin/env python 
+# Mason Cooper (coopem4) & John Drogo (drogoj)
 n_blocks = 128
 blocksize = 4096
 
@@ -46,47 +47,49 @@ class Server:
       thread.start()
 
   # the following functions implement the server functionality requested
-  def store(client, args):
+  def store(self, client, args):
     if len(args) != 3:
       client.send("ERROR: INVALID COMMAND.\n")
       return
-    if args[1] in files:
+    if args[1] in self.files:
       client.send("ERROR: FILE EXISTS.\n")
       data = client.recv(args[2]) # can we assume data will be sent regardless of error?
       return
     # actually do the storing stuff
-    data = client.recv(args[2]) 
+    data = client.recv(int(args[2]))
     f = open(args[1], 'w')
     f.write(data)
-    files.add(args[1])
+    self.files.add(args[1])
     client.send("ACK\n")
 
-  def read(client, args):
+  def read(self, client, args):
     if len(args) != 4:
       client.send("ERROR: INVALID COMMAND.\n")
       return
-    if args[1] not in files:
+    if args[1] not in self.files:
       client.send("ERROR: NO SUCH FILE.\n")
       return
     data = open(args[1], "r").read()
     if int(args[2])+int(args[3]) > len(data):
       client.send("ERROR: INVALID BYTE RANGE.\n")
       return
-    client.send("ACK", str(args[3])+"\n"+data[int(args[2]):int(args[2])+int(args[3])])
+    result = "ACK " + str(args[3])+"\n"+data[int(args[2]):int(args[2])+int(args[3])]
+    client.send(result)
 
-  def delete(client, args):
+  def delete(self, client, args):
     if len(args) != 2:
       client.send("ERROR: INVALID COMMAND.\n")
       return
-    if args[1] not in files:
+    if args[1] not in self.files:
       client.send("ERROR: NO SUCH FILE.\n")
       return
     os.remove(args[1])
-    files.remove(args[1])
-
-  def dir(client):
-    files_sorted = sorted(lst, key=str.lower)
-    result = str(len(files))+"\n"
+    self.files.remove(args[1])
+    client.send("ACK\n")
+  
+  def dir(self, client):
+    files_sorted = sorted(self.files, key=str.lower)
+    result = str(len(self.files))+"\n"
     for f in files_sorted:
       result += f + "\n"
     client.send(result)
