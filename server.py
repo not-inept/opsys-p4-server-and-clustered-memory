@@ -62,14 +62,24 @@ class Server:
     client.send("ACK\n")
 
   def read(client, args):
-    print "Not yet implemented."
+    if len(args) != 4:
+      client.send("ERROR: INVALID COMMAND.\n")
+      return
+    if args[1] not in files:
+      client.send("ERROR: NO SUCH FILE.\n")
+      return
+    data = open(args[1], "r").read()
+    if int(args[2])+int(args[3]) > len(data):
+      client.send("ERROR: INVALID BYTE RANGE.\n")
+      return
+    client.send("ACK", str(args[3])+"\n"+data[int(args[2]):int(args[2])+int(args[3])])
 
   def delete(client, args):
     if len(args) != 2:
       client.send("ERROR: INVALID COMMAND.\n")
       return
     if args[1] not in files:
-      client.send("ERROR: NO SUCH FILE\n")
+      client.send("ERROR: NO SUCH FILE.\n")
       return
     os.remove(args[1])
     files.remove(args[1])
