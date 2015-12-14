@@ -13,102 +13,26 @@ s.connect((host,port))
 # print s.recv(1024)
 # print "about to close"
 # s.close() 
+def sendCmd(s, cmd, expected):
+	s.send(cmd)
+	really_is = s.recv(1024)
+	if expected == really_is:
+		print "VALID TRANSACTION"
+	else:
+		print "INVALID"	
+	# print "Should be:\n"+expected
+	# print "Really is:\n"+really_is
 
+test_cmds = [
+	("STORE xyz.txt 14\nABCDEFGHIJKLMN", "ACK\n"),
+	("STORE abc.txt 12\nABCDEFG\0\0\0\nZ", "ACK\n"),
+	("READ xyz.txt 4 5\n", "ACK 5\nEFGHI"),
+	("DIR\n", "2\nabc.txt\nxyz.txt\n"),
+	("DELETE xyz.txt\n", "ACK\n"),
+	("DIR\n", "1\nabc.txt\n"),
+	("DELETE abc.txt\n", "ACK\n"),
+	("DIR\n", "0\n")
+]
 
-
-i=0
-s.send("STORE xyz.txt 14\nABCDEFGHIJKLMN")
-should_be = "ACK\n"
-really_is = s.recv(1024)
-print "Beginning transanction #"+str(i)
-if should_be == really_is:
-	print "VALID TRANSACTION"
-else:
-	print "INVALID"
-print "Should be:\n"+should_be
-print "Really is:\n"+really_is
-
-i+=1
-s.send("STORE abc.txt 12\nABCDEFG\0\0\0\nZ")
-should_be = "ACK\n"
-really_is = s.recv(1024)
-print "Beginning transanction #"+str(i)
-if should_be == really_is:
-	print "VALID TRANSACTION"
-else:
-	print "INVALID"
-print "Should be:\n"+should_be
-print "Really is:\n"+really_is
-
-i+=1
-s.send("READ xyz.txt 4 5\n")
-should_be = "ACK 5\nEFGHI"
-really_is = s.recv(1024)
-print "Beginning transanction #"+str(i)
-if should_be == really_is:
-	print "VALID TRANSACTION"
-else:
-	print "INVALID"
-print "Should be:\n"+should_be
-print "Really is:\n"+really_is
-
-i+=1
-s.send("DIR\n")
-should_be = "2\nabc.txt\nxyz.txt\n"
-really_is = s.recv(1024)
-print "Beginning transanction #"+str(i)
-if should_be == really_is:
-	print "VALID TRANSACTION"
-else:
-	print "INVALID"
-print "Should be:\n"+should_be
-print "Really is:\n"+really_is
-
-i+=1
-s.send("DELETE xyz.txt\n")
-should_be = "ACK\n"
-really_is = s.recv(1024)
-print "Beginning transanction #"+str(i)
-if should_be == really_is:
-	print "VALID TRANSACTION"
-else:
-	print "INVALID"
-print "Should be:\n"+should_be
-print "Really is:\n"+really_is
-
-i+=1
-s.send("DIR\n")
-should_be = "1\nabc.txt\n"
-really_is = s.recv(1024)
-print "Beginning transanction #"+str(i)
-if should_be == really_is:
-	print "VALID TRANSACTION"
-else:
-	print "INVALID"
-print "Should be:\n"+should_be
-print "Really is:\n"+really_is
-
-i+=1
-s.send("DELETE abc.txt\n")
-should_be = "ACK\n"
-really_is = s.recv(1024)
-print "Beginning transanction #"+str(i)
-if should_be == really_is:
-	print "VALID TRANSACTION"
-else:
-	print "INVALID"
-print "Should be:\n"+should_be
-print "Really is:\n"+really_is
-
-i+=1
-s.send("DIR\n")
-should_be = "0\n"
-really_is = s.recv(1024)
-print "Beginning transanction #"+str(i)
-if should_be == really_is:
-	print "VALID TRANSACTION"
-else:
-	print "INVALID"
-print "Should be:\n"+should_be
-print "Really is:\n"+really_is
-s.close()
+for t in test_cmds:
+	sendCmd(s, *t)
