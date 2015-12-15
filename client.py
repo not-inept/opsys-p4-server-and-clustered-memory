@@ -16,10 +16,8 @@ s.connect((host,port))
 def sendCmd(s, cmd, expected):
 	s.send(cmd)
 	really_is = s.recv(1024)
-	if expected == really_is:
-		print "VALID TRANSACTION"
-	else:
-		print "INVALID"	
+	assert(expected == really_is)
+
 	# print "Should be:\n"+expected
 	# print "Really is:\n"+really_is
 

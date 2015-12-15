@@ -99,7 +99,7 @@ class Server:
     result = "ACK " + str(args[3])+"\n"+data[int(args[2]):int(args[2])+int(args[3])]
     print "[thread",thread+"] Sent: ACK", args[3]
     client.send(result)
-    response = self.memory.read(args[1], args[2], args[3])
+    response = self.memory.read(args[1], int(args[2]), int(args[3]))
     print "[thread",thread+"] Sent %s bytes (from %s '%s' blocks) from offset %s." % response
 
   def delete(self, client, args):
@@ -121,13 +121,13 @@ class Server:
     print self.memory
     print "[thread",thread+"] Sent: ACK"
 
-
-
   def dir(self, client):
+    thread = str(threading.current_thread().ident)
     files_sorted = sorted(self.files, key=str.lower)
     result = str(len(self.files))+"\n"
     for f in files_sorted:
       result += f + "\n"
+    print "[thread",thread+"] Sent list of %d" % len(self.files), ("file" if len(self.files) == 1 else "files") + "."
     client.send(result)
 
   def handler(self, cmd, client):
