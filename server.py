@@ -114,7 +114,11 @@ class Server:
       return
     os.remove(args[1])
     self.files.remove(args[1])
+    response = self.memory.deleteFile(args[1])
     client.send("ACK\n")
+    print "[thread",thread+"] Deleted", args[1],"file '%s' (deallocated %s blocks)" % response
+    print "[thread",thread+"] Simulated Clustered Disk Space Allocation:"
+    print self.memory
     print "[thread",thread+"] Sent: ACK"
 
 
