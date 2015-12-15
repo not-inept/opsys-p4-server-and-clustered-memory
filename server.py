@@ -64,12 +64,12 @@ class Server:
       client.send("ERROR: INVALID COMMAND.\n")
       print "[thread",thread+"] Sent: ERROR: INVALID COMMAND."
       return
+    args[2] = int(args[2])
     if args[1] in self.files:
       client.send("ERROR: FILE EXISTS.\n")
       print "[thread",thread+"] Sent: ERROR: FILE EXISTS."
       data = client.recv(args[2]) # can we assume data will be sent regardless of error?
       return
-    args[2] = int(args[2])
     response = self.memory.alloc(args[1], args[2])
     if not response[0]:
       client.send("ERROR: INSUFFICIENT DISK SPACE.\n")
