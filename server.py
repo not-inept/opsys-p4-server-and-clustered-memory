@@ -7,6 +7,9 @@ import threading
 import socket 
 import os
 
+# get our memory module
+from memory import Memory
+
 class Server:
   backlog = 5 
   # this set will serve as a filesystem index
@@ -19,6 +22,7 @@ class Server:
     self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
     self.s.bind((host,port)) 
     self.port = port
+    self.memory = Memory(n_blocks, blocksize)
     print "Block size is", blocksize
     print "Number of blocks is", n_blocks
 
@@ -58,11 +62,20 @@ class Server:
       print "[thread",thread+"] Sent: ERROR: FILE EXISTS."
       data = client.recv(args[2]) # can we assume data will be sent regardless of error?
       return
+    response = self.memory.alloc(args[1], args[2])
+    if not response[0]:
+      client.send("ERROR: NOT ENOUGH SPACE.\n")
+      print "[thread",thread+"] Sent: ERROR: NOT ENOUGH SPACE."
+      data = client.recv(args[2]) # can we assume data will be sent regardless of error?
+      return
     # actually do the storing stuff
     data = client.recv(int(args[2]))
     f = open(args[1], 'w')
     f.write(data)
     self.files.add(args[1])
+    print "[thread",thread+"] Stored file '%s' (%s bytes; %s blocks; %s" % response, ("cluster" if response[3] == 1 else "cluster") + ")"
+    print "[thread",thread+"] Simulated Clustered Disk Space Allocation:"
+    print self.memory
     client.send("ACK\n")
     print "[thread",thread+"] Sent: ACK"
 
@@ -84,7 +97,10 @@ class Server:
       return
     # TODO: (1) Memory dump / print output
     result = "ACK " + str(args[3])+"\n"+data[int(args[2]):int(args[2])+int(args[3])]
+    print "[thread",thread+"] Sent: ACK", args[3]
     client.send(result)
+    response = self.memory.read(args[1], args[2], args[3])
+    print "[thread",thread+"] Sent %d bytes (from %d '%s' blocks) from offset %d." % response
 
   def delete(self, client, args):
     thread = str(threading.current_thread().ident)
