@@ -5,6 +5,7 @@ blocksize = 4096
 
 import threading
 import socket 
+import shutil
 import os
 
 # get our memory module
@@ -18,6 +19,12 @@ class Server:
   def __init__(self, port):
     # creates server object
     global blocksize, n_blocks
+    path = ".storage"
+    try:
+        os.makedirs(path)
+    except OSError as exception:
+        shutil.rmtree(path)
+        os.makedirs(path)
     host = '' 
     self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
     self.s.bind((host,port)) 
@@ -62,6 +69,7 @@ class Server:
       print "[thread",thread+"] Sent: ERROR: FILE EXISTS."
       data = client.recv(args[2]) # can we assume data will be sent regardless of error?
       return
+    args[2] = int(args[2])
     response = self.memory.alloc(args[1], args[2])
     if not response[0]:
       client.send("ERROR: INSUFFICIENT DISK SPACE.\n")
@@ -69,8 +77,8 @@ class Server:
       data = client.recv(args[2]) # can we assume data will be sent regardless of error?
       return
     # actually do the storing stuff
-    data = client.recv(int(args[2]))
-    f = open(args[1], 'w')
+    data = client.recv(args[2])
+    f = open(".storage/"+args[1], 'w')
     f.write(data)
     self.files.add(args[1])
     print "[thread",thread+"] Stored file '%s' (%s bytes; %s blocks; %s" % response, ("cluster" if response[3] == 1 else "cluster") + ")"
@@ -78,7 +86,6 @@ class Server:
     print self.memory
     client.send("ACK\n")
     print "[thread",thread+"] Sent: ACK"
-
 
   def read(self, client, args):
     thread = str(threading.current_thread().ident)
@@ -90,16 +97,18 @@ class Server:
       client.send("ERROR: NO SUCH FILE.\n")
       print "[thread",thread+"] Sent: ERROR: NO SUCH FILE."
       return
-    data = open(args[1], "r").read()
-    if int(args[2])+int(args[3]) > len(data) or int(args[2]) < 0 or int(args[3]) < 0:
+    args[2] = int(args[2])
+    args[3] = int(args[3])
+    data = open(".storage/"+args[1], "r").read()
+    if args[2]+args[3] > len(data) or args[2] < 0 or args[3] < 0:
       client.send("ERROR: INVALID BYTE RANGE.\n")
       print "[thread",thread+"] Sent: ERROR: INVALID BYTE RANGE."
       return
     # TODO: (1) Memory dump / print output
-    result = "ACK " + str(args[3])+"\n"+data[int(args[2]):int(args[2])+int(args[3])]
+    result = "ACK " + str(args[3])+"\n"+data[args[2]:args[2]+args[3]]
     print "[thread",thread+"] Sent: ACK", args[3]
     client.send(result)
-    response = self.memory.read(args[1], int(args[2]), int(args[3]))
+    response = self.memory.read(args[1], args[2], args[3])
     print "[thread",thread+"] Sent %s bytes (from %s '%s' blocks) from offset %s." % response
 
   def delete(self, client, args):
@@ -135,7 +144,7 @@ class Server:
     thread = str(threading.current_thread().ident)
     while cmd:
       print "[thread",thread+"] Rcvd:", cmd
-      args = cmd.split(' ')
+      args = cmd.split(' ').strip()
       if args[0] == "STORE":
         self.store(client, args)
       elif args[0] == "READ":
@@ -150,7 +159,6 @@ class Server:
       cmd = self.process_line(client).strip()
     print "[thread",thread+"] Client closed its socket....terminating."
     client.close()
-
 
 if __name__ == "__main__":
   s = Server(8765)
