@@ -78,7 +78,7 @@ class Server:
       print "[thread",thread+"] Sent: ERROR: NO SUCH FILE."
       return
     data = open(args[1], "r").read()
-    if int(args[2])+int(args[3]) > len(data):
+    if int(args[2])+int(args[3]) > len(data) or int(args[2]) < 0 or int(args[3]) < 0:
       client.send("ERROR: INVALID BYTE RANGE.\n")
       print "[thread",thread+"] Sent: ERROR: INVALID BYTE RANGE."
       return
@@ -91,7 +91,6 @@ class Server:
     if len(args) != 2:
       client.send("ERROR: INVALID COMMAND.\n")
       print "[thread",thread+"] Sent: INVALID COMMAND."
-
       return
     if args[1] not in self.files:
       client.send("ERROR: NO SUCH FILE.\n")
