@@ -56,9 +56,9 @@ r = m.alloc("weird", 10000)
 print r
 
 r =  m.read("weird", 4096, 4096)
-assert(r == ("E", 4096, 4096, 1))
 print r
 print m
+assert(r == ("E", 4096, 4096, 1))
 
 
 print m.lookupTable

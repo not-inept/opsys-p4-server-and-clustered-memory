@@ -80,7 +80,7 @@ class Memory:
                         curSize += self.block_size
 
                     else:
-                        return size, numBlocks, newChar, curOffest #, curOffset, min(curSize, size), numBlocks
+                        return size, numBlocks, newChar, curOffset #, curOffset, min(curSize, size), numBlocks
 
         #Edge case, offset takes us to the last block.
         if (curOffset > offset): #Record the remainin data from the block after the offset is accounted for.
