@@ -1,4 +1,5 @@
-#! /usr/bin/env python
+#!/usr/bin/env python 
+# Mason Cooper (coopem4) & John Drogo (drogoj)
 
 import re
 from math import ceil

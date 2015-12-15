@@ -1,3 +1,4 @@
+# Mason Cooper (coopem4) & John Drogo (drogoj)
 from memory import *
 
 m = Memory()
