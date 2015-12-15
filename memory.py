@@ -1,4 +1,4 @@
-#! /usr//localbin/python
+#! /usr/bin/env python
 
 import re
 from math import ceil
@@ -27,20 +27,16 @@ class Memory:
     def alloc(self, filename, size):
         filesInUse = set(self.internal)
         assert(len(filesInUse) < 26) #We should never try to add a new file when we have 24 allocated.
-        #assert(not filename in filesInUse)
         assert(not filename in self.lookupTable.keys())
-
         #newChar = (alpha - filesInUse).pop() #THe better way.
         newChar = sorted(list(alpha - filesInUse))[0] #Since I like alphabetic order.
         numBlocks = int(ceil(float(size)/self.blockSize))
         numClusters = 0
-
         if (self.internal.count(".") >= numBlocks):
             self.lookupTable[filename] = newChar
             self.internal = self.internal.replace(".", newChar, numBlocks)
             numClusters = len([ x for x in re.split("[^"+newChar+"]*", self.internal) if len(x) ]) 
             return newChar, size, numBlocks, numClusters 
-
         else:
             return 0, 0, 0, 0
 
@@ -62,14 +58,9 @@ class Memory:
         #I don't remmeber how big each file is, this could be a problem if we don't fill an entire block.....
         assert(filename in self.lookupTable.keys())
         newChar = self.lookupTable[filename]
-        #return newChar, offset, size, ceil(float(size)/self.block_size)
-
         clusters = [ x for x in re.split("[^"+newChar+"]*", self.internal) if len(x) ]
-        numClusters = 0
-        numBlocks = 0
-        curOffset = 0
-        curSize = 0
-
+        numClusters = 0; numBlocks = 0
+        curOffset = 0; curSize = 0
         for cluster in clusters:
             numClusters += 1
             for block in cluster:
@@ -82,7 +73,7 @@ class Memory:
                         numBlocks += 1
                         curSize += curOffset - offset
                         curOffset = offset
-                    
+
                     if curSize < size:
                         numBlocks += 1
                         curSize += self.block_size
@@ -96,7 +87,7 @@ class Memory:
             curSize += curOffset - offset
             curOffset = offset
 
-        #print newChar, curOffset, curSize, numBlocks
+        #TODO: Add check for our of bounds errors.
         #assert(curSize <= size)
         return newChar, curOffset, min(curSize, size), numBlocks
 

@@ -73,9 +73,15 @@ print r
 assert(r == ("B", 4095, 4098, 3))
 print m
 
-r = m.read("afafagagag", 4095, 4097)
+r = m.read("afafagagag", 4090, 5000)
+assert(r == ("B", 4090, 5000, 3))
 print r
-assert(r == ("B", 4095, 4097, 2))
 print m
+
+
+#TODO: Check out of bounds errors.
+#TODO: CHekc misnamed errors.
+#TODO: Reallocation of a files in use.
+#TODO: Add errors if asserts are violated.
 
 print "\n\nTests Passed!"
