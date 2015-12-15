@@ -48,11 +48,14 @@ class Server:
 
   # the following functions implement the server functionality requested
   def store(self, client, args):
+    thread = str(threading.current_thread().ident)
     if len(args) != 3:
       client.send("ERROR: INVALID COMMAND.\n")
+      print "[thread",thread+"] Sent: ERROR: INVALID COMMAND."
       return
     if args[1] in self.files:
       client.send("ERROR: FILE EXISTS.\n")
+      print "[thread",thread+"] Sent: ERROR: FILE EXISTS."
       data = client.recv(args[2]) # can we assume data will be sent regardless of error?
       return
     # actually do the storing stuff
@@ -61,32 +64,46 @@ class Server:
     f.write(data)
     self.files.add(args[1])
     client.send("ACK\n")
+    print "[thread",thread+"] Sent: ACK"
+
 
   def read(self, client, args):
+    thread = str(threading.current_thread().ident)
     if len(args) != 4:
       client.send("ERROR: INVALID COMMAND.\n")
+      print "[thread",thread+"] Sent: ERROR: INVALID COMMAND."
       return
     if args[1] not in self.files:
       client.send("ERROR: NO SUCH FILE.\n")
+      print "[thread",thread+"] Sent: ERROR: NO SUCH FILE."
       return
     data = open(args[1], "r").read()
     if int(args[2])+int(args[3]) > len(data):
       client.send("ERROR: INVALID BYTE RANGE.\n")
+      print "[thread",thread+"] Sent: ERROR: INVALID BYTE RANGE."
       return
+    # TODO: (1) Memory dump / print output
     result = "ACK " + str(args[3])+"\n"+data[int(args[2]):int(args[2])+int(args[3])]
     client.send(result)
 
   def delete(self, client, args):
+    thread = str(threading.current_thread().ident)
     if len(args) != 2:
       client.send("ERROR: INVALID COMMAND.\n")
+      print "[thread",thread+"] Sent: INVALID COMMAND."
+
       return
     if args[1] not in self.files:
       client.send("ERROR: NO SUCH FILE.\n")
+      print "[thread",thread+"] Sent: ERROR: NO SUCH FILE."
       return
     os.remove(args[1])
     self.files.remove(args[1])
     client.send("ACK\n")
-  
+    print "[thread",thread+"] Sent: ACK"
+
+
+
   def dir(self, client):
     files_sorted = sorted(self.files, key=str.lower)
     result = str(len(self.files))+"\n"
@@ -110,9 +127,9 @@ class Server:
         self.dir(client)
       else:
         client.send("ERROR: INVALID COMMAND.\n")
+        print "[thread",thread+"] Sent: ERROR: INVALID COMMAND."
       cmd = self.process_line(client).strip()
-
-    print "[thread",thread+"] Client closed its socket....terminating"
+    print "[thread",thread+"] Client closed its socket....terminating."
     client.close()
 
 
