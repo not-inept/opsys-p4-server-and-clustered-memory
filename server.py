@@ -121,7 +121,7 @@ class Server:
       client.send("ERROR: NO SUCH FILE.\n")
       print "[thread",thread+"] Sent: ERROR: NO SUCH FILE."
       return
-    os.remove(args[1])
+    os.remove(".storage/"+args[1])
     self.files.remove(args[1])
     response = self.memory.deleteFile(args[1])
     client.send("ACK\n")
@@ -144,7 +144,8 @@ class Server:
     thread = str(threading.current_thread().ident)
     while cmd:
       print "[thread",thread+"] Rcvd:", cmd
-      args = cmd.split(' ').strip()
+      args = cmd.split(' ')
+      args[0] = args[0].strip()
       if args[0] == "STORE":
         self.store(client, args)
       elif args[0] == "READ":
