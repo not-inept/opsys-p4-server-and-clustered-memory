@@ -90,7 +90,7 @@ class Memory:
 
         #TODO: Add check for our of bounds errors.
         #assert(curSize <= size)
-        return size, numBlocks, newChar, curOffest #newChar, curOffset, min(curSize, size), numBlocks
+        return size, numBlocks, newChar, curOffset #newChar, curOffset, min(curSize, size), numBlocks
 
 
     def __init__(self, n_block=128, blockSize=4096, blocksPerLine=32):

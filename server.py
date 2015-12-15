@@ -100,7 +100,7 @@ class Server:
     print "[thread",thread+"] Sent: ACK", args[3]
     client.send(result)
     response = self.memory.read(args[1], args[2], args[3])
-    print "[thread",thread+"] Sent %d bytes (from %d '%s' blocks) from offset %d." % response
+    print "[thread",thread+"] Sent %s bytes (from %s '%s' blocks) from offset %s." % response
 
   def delete(self, client, args):
     thread = str(threading.current_thread().ident)
