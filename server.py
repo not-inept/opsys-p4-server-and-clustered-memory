@@ -64,8 +64,8 @@ class Server:
       return
     response = self.memory.alloc(args[1], args[2])
     if not response[0]:
-      client.send("ERROR: NOT ENOUGH SPACE.\n")
-      print "[thread",thread+"] Sent: ERROR: NOT ENOUGH SPACE."
+      client.send("ERROR: INSUFFICIENT DISK SPACE.\n")
+      print "[thread",thread+"] Sent: ERROR: INSUFFICIENT DISK SPACE."
       data = client.recv(args[2]) # can we assume data will be sent regardless of error?
       return
     # actually do the storing stuff
